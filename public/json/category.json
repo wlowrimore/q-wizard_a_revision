@@ -1,0 +1,58 @@
+[
+  {
+    "id": "c1",
+    "name": "Art-Literature"
+  },
+  {
+    "id": "c2",
+    "name": "Language"
+  },
+  {
+    "id": "c3",
+    "name": "Science-Nature"
+  },
+  {
+    "id": "c4",
+    "name": "General"
+  },
+  {
+    "id": "c5",
+    "name": "Food-Drink"
+  },
+  {
+    "id": "c6",
+    "name": "People-Places"
+  },
+  {
+    "id": "c7",
+    "name": "Geography"
+  },
+  {
+    "id": "c8",
+    "name": "History-Holidays"
+  },
+  {
+    "id": "c9",
+    "name": "Entertainment"
+  },
+  {
+    "id": "c10",
+    "name": "Toys-Games"
+  },
+  {
+    "id": "c11",
+    "name": "Music"
+  },
+  {
+    "id": "c12",
+    "name": "Mathematics"
+  },
+  {
+    "id": "c13",
+    "name": "Religion-Mythology"
+  },
+  {
+    "id": "c14",
+    "name": "Sports-Leisure"
+  }
+]

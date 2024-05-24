@@ -4,11 +4,11 @@ import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import SignInBtn from "./ui/SignInBtn";
 import CancelBtn from "./ui/CancelBtn";
+import { getFirstName } from "../helpers";
 
 const SignInComponent: React.FC = () => {
   const { data: session } = useSession();
-
-  const firstName = session?.user?.name?.split(" ")[0];
+  const firstName = getFirstName();
 
   return (
     <>

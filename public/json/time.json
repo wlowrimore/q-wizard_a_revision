@@ -1,0 +1,26 @@
+[
+  {
+    "id": "t1",
+    "name": "10 seconds",
+    "label": "10 seconds",
+    "stars": "⭐⭐⭐⭐" 
+  },
+  {
+    "id": "t2",
+    "name": "15 seconds",
+    "label": "15 seconds",
+    "stars": "⭐⭐⭐"
+  },
+  {
+    "id": "t3",
+    "name": "20 seconds",
+    "label": "20 seconds",
+    "stars": "⭐⭐"
+  },
+  {
+    "id": "t4",
+    "name": "30 seconds",
+    "label": "30 seconds",
+    "stars": "⭐"
+  }
+]
