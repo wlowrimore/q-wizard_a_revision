@@ -4,6 +4,7 @@ import "./globals.css";
 import { UserProvider } from "@/contexts/UserContext";
 import AuthProvider from "@/contexts/AuthProvider";
 import Header from "@/components/header/Header";
+import { QuizProvider } from "@/contexts/QuizContext";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -24,10 +25,12 @@ export default function RootLayout({
     <html lang="en">
       <AuthProvider>
         <UserProvider>
-          <body className={manrope.className}>
-            <Header />
-            <main>{children}</main>
-          </body>
+          <QuizProvider>
+            <body className={manrope.className}>
+              <Header />
+              <main>{children}</main>
+            </body>
+          </QuizProvider>
         </UserProvider>
       </AuthProvider>
     </html>

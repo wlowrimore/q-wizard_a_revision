@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import {
   useSession,
   signIn as signInNextAuth,
@@ -14,6 +14,11 @@ export interface User {
   name?: string;
   email?: string;
   image?: string;
+  quizSettings: {
+    selectedCategory: string;
+    selectedTimeLimit: string;
+    selectedNumOfQuestions: string;
+  };
 }
 
 export interface UserContextProps {
@@ -36,7 +41,10 @@ export const UserProvider: React.FC<UserContextProps> = ({ children }) => {
   const { data: session } = useSession();
   const [user, setUser] = useState<User | null>(null);
 
-  // local storage logic
+  // -------------------------------------------
+  // LOCAL STORAGE LOGIC
+  // -------------------------------------------
+
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -45,7 +53,10 @@ export const UserProvider: React.FC<UserContextProps> = ({ children }) => {
     }
   }, []);
 
-  // local storage update logic
+  // -------------------------------------------
+  // UPDATE LOCAL STORAGE
+  // -------------------------------------------
+
   useEffect(() => {
     if (user) {
       const userToStore = { ...user };
@@ -55,25 +66,30 @@ export const UserProvider: React.FC<UserContextProps> = ({ children }) => {
     }
   }, [user]);
 
-  // useEffect(() => {
-  //   if (session?.user) {
-  //     const { id, name, email, image } = session.user as {
-  //       id: string | null;
-  //       name?: string | null;
-  //       email?: string | null;
-  //       image?: string | null;
-  //     };
+  useEffect(() => {
+    if (session?.user) {
+      const { id, name, email, image } = session.user as {
+        id: string | null;
+        name?: string | null;
+        email?: string | null;
+        image?: string | null;
+      };
 
-  //     setUser({
-  //       id: id ?? "",
-  //       name: name ?? "",
-  //       email: email ?? "",
-  //       image: image ?? "",
-  //     });
-  //   } else {
-  //     setUser(null);
-  //   }
-  // }, [session]);
+      setUser({
+        id: id ?? "",
+        name: name ?? "",
+        email: email ?? "",
+        image: image ?? "",
+        quizSettings: {
+          selectedCategory: "",
+          selectedTimeLimit: "",
+          selectedNumOfQuestions: "",
+        },
+      });
+    } else {
+      setUser(null);
+    }
+  }, [session]);
 
   return (
     <UserContext.Provider value={{ user, signIn, signOut }}>
