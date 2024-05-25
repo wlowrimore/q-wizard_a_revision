@@ -3,6 +3,7 @@
 import React from "react";
 import { getFirstName } from "../../helpers";
 import CreateNewQuiz from "./CreateNewQuiz";
+import PreviousQuizzes from "./PreviousQuizzes";
 
 const DashboardMain: React.FC = () => {
   const firstName = getFirstName();
@@ -15,8 +16,9 @@ const DashboardMain: React.FC = () => {
       <div className="font-light text-blue-600 text-xl">
         <h1>&#40;Previous Quizzes Container&#41;</h1>
       </div>
-      <div>
+      <div className="flex gap-10">
         <CreateNewQuiz />
+        <PreviousQuizzes />
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { createContext, useContext, useState } from "react";
 
 export interface QuizContextValue extends QuizData {
   updateQuizData: (updateQuizData: Partial<QuizData>) => void;
+  quizzes: QuizData[];
 }
 
 export const QuizContext = createContext<QuizContextValue>({
@@ -13,6 +14,7 @@ export const QuizContext = createContext<QuizContextValue>({
   selectedCategories: [],
   selectedTimeLimit: "",
   selectedNumOfQuestions: "",
+  quizzes: [],
 });
 
 export interface QuizData {
@@ -46,6 +48,7 @@ export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({
   const value: QuizContextValue = {
     ...quizData,
     updateQuizData,
+    quizzes: JSON.parse(localStorage.getItem("quizzes") || "[]"),
   };
 
   return <QuizContext.Provider value={value}>{children}</QuizContext.Provider>;
