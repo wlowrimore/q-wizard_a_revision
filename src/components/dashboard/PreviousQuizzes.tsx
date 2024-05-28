@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useContext } from "react";
+import { openDB } from "idb";
+import { useContext, useState, useEffect } from "react";
 import { UserContext } from "../../contexts/UserContext";
 import { QuizContext, QuizData } from "../../contexts/QuizContext";
 import { useSession } from "next-auth/react";
@@ -8,9 +9,23 @@ import Image from "next/image";
 import { getFirstName } from "../../helpers";
 const PreviousQuizzes: React.FC = () => {
   const { data: session } = useSession();
-  const { quizzes } = useContext(QuizContext);
-
+  const [quizzes, setQuizzes] = useState<QuizData[]>([]);
   const firstName = getFirstName();
+
+  useEffect(() => {
+    const fetchQuizzes = async () => {
+      const db = await openDB("q-wizardDB", 1);
+      try {
+        const transaction = db.transaction("quizzes", "readonly");
+        const objectStore = transaction.objectStore("quizzes");
+        const quizData = await objectStore.getAll();
+        setQuizzes(quizData);
+      } catch (error) {
+        console.error("Error fetching quiz data:", error);
+      }
+    };
+    fetchQuizzes();
+  }, [quizzes]);
 
   return (
     <div className="flex flex-col bg-blue-100 border border-neutral-500 w-fit p-6 rounded-lg">
@@ -19,13 +34,16 @@ const PreviousQuizzes: React.FC = () => {
       </h2>
       <div className="flex gap-4">
         <div>
-          <Image
-            src={session?.user?.image as string}
-            alt={session?.user?.name as string}
-            width={500}
-            height={500}
-            className="border-4 border-yellow-400 rounded-full w-40 h-40 my-3"
-          />
+          {session && (
+            <Image
+              priority
+              src={session?.user.image as string}
+              alt={session?.user.name as string}
+              width={500}
+              height={500}
+              className="border-4 border-yellow-400 rounded-full w-40 h-40 my-3"
+            />
+          )}
         </div>
         <div className="flex flex-col items-center justify-center gap-3">
           <h2 className="text-2xl text-neutral-800 font-bold">Average Score</h2>
@@ -46,19 +64,21 @@ const PreviousQuizzes: React.FC = () => {
           Previous Quizzes
         </p>
         <div className="flex flex-wrap gap-x-2 my-2">
-          {quizzes.map((quiz: QuizData, index: number) => (
+          {quizzes.map((quiz, qzIndex) => (
             <div
-              key={index}
+              key={qzIndex}
               className="mt-2 bg-white/70 py-2 px-3 border border-neutral-950 rounded-lg"
             >
               <p className="text-neutral-950 font-semibold">{quiz.quizTitle}</p>
-              {/* {quiz.selectedCategories.map((category: string, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <p className="text-neutral-600">{category}</p>
-                </div>
-              ))} */}
-              {/* <p className="text-neutral-600">{quiz.selectedNumOfQuestions}</p>
-              <p className="text-neutral-600">{quiz.selectedTimeLimit}</p> */}
+              {quiz.selectedCategories.map(
+                (category: string, catIndex: number) => (
+                  <div key={catIndex} className="flex items-center gap-2">
+                    <p className="text-neutral-600">{category}</p>
+                  </div>
+                )
+              )}
+              <p className="text-neutral-600">{quiz.selectedNumOfQuestions}</p>
+              <p className="text-neutral-600">{quiz.selectedTimeLimit}</p>
             </div>
           ))}
         </div>

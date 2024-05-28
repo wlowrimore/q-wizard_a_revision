@@ -13,9 +13,9 @@ const DashboardMain: React.FC = () => {
         <h1 className="text-2xl font-semibold">{firstName}&apos;s Dashboard</h1>
         <p className="text-orange-700">&#40;High Score Here&#41;</p>
       </div>
-      <div className="font-light text-blue-600 text-xl">
+      {/* <div className="font-light text-blue-600 text-xl">
         <h1>&#40;Previous Quizzes Container&#41;</h1>
-      </div>
+      </div> */}
       <div className="flex gap-10">
         <CreateNewQuiz />
         <PreviousQuizzes />

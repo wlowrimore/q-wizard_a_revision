@@ -1,55 +1,197 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
-
-export interface QuizContextValue extends QuizData {
-  updateQuizData: (updateQuizData: Partial<QuizData>) => void;
-  quizzes: QuizData[];
-}
-
-export const QuizContext = createContext<QuizContextValue>({
-  updateQuizData: () => {},
-  createdBy: "",
-  quizTitle: "",
-  selectedCategories: [],
-  selectedTimeLimit: "",
-  selectedNumOfQuestions: "",
-  quizzes: [],
-});
+import { IDBPCursorWithValue, openDB } from "idb";
+import { createContext, useContext, useState, useEffect } from "react";
+import { UserData } from "../dataModels";
+import { UserContext } from "./UserContext";
 
 export interface QuizData {
-  createdBy: string;
+  quizId: string;
   quizTitle: string;
   selectedCategories: string[];
   selectedTimeLimit: string;
   selectedNumOfQuestions: string;
-  updateQuizData: (updatedData: Partial<QuizData>) => void;
+  createdBy: string;
+  quizzes: QuizData[];
+  userId: string;
 }
 
-export const QuizProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
-  const [quizData, setQuizData] = useState<QuizData>({
-    createdBy: "", // Initialize with an empty string
+export interface QuizContextValue {
+  quizData: QuizData;
+  dispatch: React.Dispatch<{
+    type: string;
+    quizData: QuizData;
+    userId: string; // Add the userId property here
+  }>;
+  userId: string;
+  quizzes: QuizData[];
+}
+
+interface QuizContextProps {
+  children: React.ReactNode;
+}
+
+export const QuizContext = createContext<QuizContextValue>({
+  quizData: {
+    quizId: "",
     quizTitle: "",
     selectedCategories: [],
     selectedTimeLimit: "",
     selectedNumOfQuestions: "",
-    updateQuizData: () => {},
+    createdBy: "",
+    quizzes: [],
+    userId: "",
+  },
+  dispatch: function (value: {
+    type: string;
+    quizData: QuizData;
+    userId: string; // Add the userId property here
+  }): void {
+    throw new Error("Function not implemented.");
+  },
+  userId: "",
+  quizzes: [],
+});
+
+// const openIndexedDB = async () => {
+//   const db = await openDB("q-wizardDB", 1, {
+//     upgrade(db) {
+//       db.createObjectStore("quizzes", { keyPath: "id" });
+//     },
+//   });
+//   return db;
+// };
+
+const addQuizToIndexedDB = async (quizData: QuizData) => {
+  const db = await openDB("q-wizardDB", 1);
+  const transaction = db.transaction("quizzes", "readwrite");
+  const objectStore = transaction.objectStore("quizzes");
+  await objectStore.add(quizData);
+};
+
+const removeQuizFromIndexedDB = async (quizId: string) => {
+  const db = await openDB("q-wizardDB", 1);
+  const transaction = db.transaction("quizzes", "readwrite");
+  const objectStore = transaction.objectStore("quizzes");
+  await objectStore.delete(quizId);
+};
+
+export const QuizProvider: React.FC<QuizContextProps> = ({ children }) => {
+  const { user } = useContext(UserContext);
+  // const [quizData, setQuizData] = useState<QuizData[]>([]);
+  const [quizData, setQuizData] = useState<QuizData>({
+    quizId: "",
+    quizTitle: "",
+    selectedCategories: [],
+    selectedTimeLimit: "",
+    selectedNumOfQuestions: "",
+    createdBy: "",
+    quizzes: [],
+    userId: "",
   });
 
-  const updateQuizData = (updateQuizData: Partial<QuizData>) => {
-    setQuizData((prevData) => ({
-      ...prevData,
-      ...updateQuizData,
-    }));
+  const dispatch = async (value: {
+    type: string;
+    quizData: QuizData;
+    userId: string;
+  }) => {
+    const { type, userId, quizData } = value;
+    const db = await openDB("q-wizardDB", 1);
+    try {
+      const transaction = db.transaction("quizzes", "readwrite");
+      const objectStore = transaction.objectStore("quizzes");
+      if (quizData.quizId) {
+        await objectStore.put({ ...quizData, userId });
+      } else {
+        await objectStore.add({ ...quizData, userId });
+      }
+
+      try {
+        const quizzes = await objectStore.getAll();
+        console.log("Quizzes before state update:", quizzes);
+        setQuizData((prevQuizData) => ({
+          ...prevQuizData,
+          quizzes: updatedQuizzes,
+        }));
+        // setQuizData((prevQuizData) => {
+        //   return {
+        //     ...prevQuizData,
+        //     quizzes: quizzes,
+        //   };
+        // });
+        const updatedQuizzes = await objectStore.getAll();
+        console.log("Quizzes after state update:", updatedQuizzes);
+      } catch (error) {
+        console.log("Error fetching quizzes:", error);
+      }
+
+      const updatedQuizzes = await objectStore.getAll();
+      updatedQuizzes.forEach((quiz: QuizData) => {
+        if (quiz.userId === userId) {
+          quiz = { ...quiz, ...quizData };
+        }
+      });
+
+      await objectStore.clear();
+      await objectStore.add(updatedQuizzes);
+      await objectStore.delete(quizData.quizId);
+      setQuizData((prevQuizData) => ({
+        ...prevQuizData,
+        quizzes: updatedQuizzes,
+      }));
+      transaction.oncomplete = () => console.log("Quiz updated successfully!");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const value: QuizContextValue = {
-    ...quizData,
-    updateQuizData,
-    quizzes: JSON.parse(localStorage.getItem("quizzes") || "[]"),
-  };
+  useEffect(() => {
+    const fetchQuizzes = async () => {
+      if (user) {
+        const db = await openDB("q-wizardDB", 1);
+        const transaction = db.transaction("quizzes", "readonly");
+        const objectStore = transaction.objectStore("quizzes");
 
-  return <QuizContext.Provider value={value}>{children}</QuizContext.Provider>;
+        const request = await objectStore.openCursor();
+        if (!request) {
+          console.error("Failed to create cursor request!");
+          return [];
+        }
+        const quizzes: QuizData[] = [];
+        for await (const cursor of request) {
+          if (cursor) {
+            if (cursor.value.user === user?.id) {
+              quizzes.push(cursor.value);
+            }
+          } else {
+            break;
+          }
+
+          console.log("Quizzes fetched from QuizContext:", quizzes);
+          return quizzes;
+        }
+
+        setQuizData((prevQuizData) => ({
+          ...prevQuizData,
+          quizzes,
+        }));
+      }
+    };
+
+    fetchQuizzes();
+  }, [user]); // Update effect only when user changes
+
+  return (
+    <QuizContext.Provider
+      value={{
+        quizData,
+        // setQuizData,
+        dispatch,
+        userId: user?.id || "",
+        quizzes: quizData.quizzes,
+      }}
+    >
+      {children}
+    </QuizContext.Provider>
+  );
 };

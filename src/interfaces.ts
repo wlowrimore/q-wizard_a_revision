@@ -14,11 +14,3 @@ export interface TimeLimit {
   label: string;
   stars: string;
 }
-
-export interface QuizData {
-  quizTitle: string;
-  selectedCategories: string[];
-  selectedTimeLimit: string;
-  selectedNumOfQuestions: string;
-  createdBy?: string;
-}

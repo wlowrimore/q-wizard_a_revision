@@ -2,30 +2,44 @@
 
 import { useState, useEffect, useRef, useContext } from "react";
 import { UserContext } from "../../contexts/UserContext";
+import { Category, NumOfQuestions, TimeLimit } from "../../interfaces";
+import { useSession } from "next-auth/react";
 import {
+  QuizContext,
+  QuizContextValue,
   QuizData,
-  Category,
-  NumOfQuestions,
-  TimeLimit,
-} from "../../interfaces";
-import { QuizContext, QuizContextValue } from "../../contexts/QuizContext";
+} from "../../contexts/QuizContext";
 import {
   getCategories,
   getNumberOfQuestions,
   getTimeLimit,
 } from "@/fetch-json-data";
 
-const CreateNewQuiz: React.FC = () => {
-  const { user } = useContext(UserContext);
-  const contextValue: QuizContextValue = useContext(QuizContext);
-  const formRef = useRef<HTMLFormElement>(null);
-
+const CreateNewQuiz: React.FC = (): React.ReactNode => {
   const [quizData, setQuizData] = useState<QuizData>({
     quizTitle: "",
     selectedCategories: [],
     selectedTimeLimit: "",
     selectedNumOfQuestions: "",
+    createdBy: "",
+    quizzes: [],
+    userId: "",
+    quizId: "",
   });
+  const [successMsg, setSuccessMsg] = useState<string>("");
+  const formRef = useRef<HTMLFormElement>(null);
+  const { data: session } = useSession();
+
+  const { dispatch } = useContext(UserContext);
+
+  const user = {
+    id: session?.user.id,
+    quizSettings: {
+      selectedCategory: "",
+      selectedTimeLimit: "",
+      selectedNumOfQuestions: "",
+    },
+  };
 
   // -------------------------------------------
   // FETCHED JSON DATA FOR UI FORM OPTIONS
@@ -87,19 +101,49 @@ const CreateNewQuiz: React.FC = () => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (user && user.name) {
-      const quizToSave = { user: user.name, ...quizData };
+    formRef.current?.reset();
 
-      const existingQuizzes = JSON.parse(
-        localStorage.getItem("quizzes") || "[]"
-      );
+    if (user && user.id) {
+      const quizToSave = { user: user.id, ...quizData };
+      console.log("Quiz to save:", quizToSave);
+      const request = indexedDB.open("q-wizardDB", 1); // Version can be incremented for schema changes
 
-      existingQuizzes.push(quizToSave);
-      localStorage.setItem("quizzes", JSON.stringify(existingQuizzes));
+      request.onerror = (event: any) => {
+        console.error("Error opening IndexedDB:", event.target.error);
+      };
 
-      formRef.current?.reset();
+      await new Promise((resolve) => {
+        request.onsuccess = () => {
+          const db = request.result as unknown as IDBDatabase;
+          if (db) {
+            const transaction = db.transaction(["quizzes"], "readwrite");
+
+            const objectStore = transaction.objectStore("quizzes");
+
+            const addRequest = objectStore.add({
+              id: Date.now(),
+              ...quizToSave,
+            });
+
+            addRequest.onsuccess = (event: any) => {
+              console.log("Quiz added to IndexedDB successfully");
+              setSuccessMsg("Quiz Added!");
+            };
+
+            addRequest.onerror = (event: any) => {
+              console.error(
+                "Error adding quiz to IndexedDB:",
+                event.target.error
+              );
+            };
+
+            transaction.oncomplete = resolve;
+          } else {
+            console.log("Database connection failed");
+          }
+        };
+      });
     } else {
-      localStorage.removeItem("quizzes");
       alert("Please sign in to create a new quiz.");
     }
   };
@@ -108,10 +152,25 @@ const CreateNewQuiz: React.FC = () => {
   // RENDER UI
   // -------------------------------------------
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSuccessMsg("");
+    }, 4000);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [successMsg]);
+
   return (
     <div className="flex flex-col bg-blue-100 border border-neutral-500 w-fit p-6 rounded-lg">
-      <h2 className="text-neutral-950 font-semibold text-2xl mb-4">
+      <h2 className="text-neutral-950 font-semibold text-2xl mb-4 flex items-center">
         Create a New Quiz
+        {successMsg && (
+          <span className="bg-green-500 text-sm text-white py-1 px-2 ml-3 rounded">
+            {successMsg}
+          </span>
+        )}
       </h2>
       <form onSubmit={handleSubmit} ref={formRef} className="flex flex-col">
         <label
