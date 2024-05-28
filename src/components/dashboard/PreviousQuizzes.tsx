@@ -7,9 +7,12 @@ import { QuizContext, QuizData } from "../../contexts/QuizContext";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { getFirstName } from "../../helpers";
+import { HiDotsVertical } from "react-icons/hi";
 const PreviousQuizzes: React.FC = () => {
   const { data: session } = useSession();
   const [quizzes, setQuizzes] = useState<QuizData[]>([]);
+  const [selectedQuiz, setSelectedQuiz] = useState<QuizData | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const firstName = getFirstName();
 
   useEffect(() => {
@@ -26,6 +29,13 @@ const PreviousQuizzes: React.FC = () => {
     };
     fetchQuizzes();
   }, [quizzes]);
+
+  const handleOpenModal = (quiz: QuizData) => {
+    setSelectedQuiz(quiz);
+    setIsModalOpen(!isModalOpen);
+  };
+
+  const questions = selectedQuiz?.selectedNumOfQuestions.split(" ")[0];
 
   return (
     <div className="flex flex-col bg-blue-100 border border-neutral-500 w-fit p-6 rounded-lg">
@@ -51,7 +61,7 @@ const PreviousQuizzes: React.FC = () => {
             89<span className="text-4xl">%</span>
           </p>
           <p className="text-xl text-neutral-700 font-bold">
-            Quizzes Completed:&nbsp;
+            Quizzes Created:&nbsp;
             <span className="text-xl px-2 border border-white bg-white rounded-full">
               {quizzes.length}
             </span>
@@ -61,24 +71,60 @@ const PreviousQuizzes: React.FC = () => {
       <hr className="w-full h-[0.3%] mt-6 bg-black"></hr>
       <div className="border-2 border-neutral-950 rounded-xl p-4 my-10 bg-gray-800/60">
         <p className="text-white tracking-wide text-2xl font-semibold">
-          Previous Quizzes
+          Quizzes
         </p>
         <div className="flex flex-wrap gap-x-2 my-2">
           {quizzes.map((quiz, qzIndex) => (
             <div
               key={qzIndex}
-              className="mt-2 bg-white/70 py-2 px-3 border border-neutral-950 rounded-lg"
+              onClick={() => handleOpenModal(quiz)}
+              className="mt-2 bg-white/70 cursor-pointer hover:bg-sky-200 py-2 px-3 border border-neutral-950 rounded-lg"
             >
-              <p className="text-neutral-950 font-semibold">{quiz.quizTitle}</p>
-              {quiz.selectedCategories.map(
-                (category: string, catIndex: number) => (
-                  <div key={catIndex} className="flex items-center gap-2">
-                    <p className="text-neutral-600">{category}</p>
+              <div className="flex items-center">
+                <p className="text-neutral-950 font-semibold">
+                  {quiz.quizTitle}&nbsp;
+                </p>
+                <p>
+                  <HiDotsVertical />
+                </p>
+              </div>
+              {isModalOpen && (
+                <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-slate-700/40 backdrop-blur-3xl">
+                  <div className="bg-gradient-to-tr from-white via-sky-200/30 to-white w-1/2 flex flex-col p-6 border border-neutral-900/70 rounded-lg">
+                    <p className="text-neutral-950 text-3xl mb-4 font-semibold">
+                      {selectedQuiz?.quizTitle}
+                    </p>
+                    <p className="text-neutral-800 text-xl font-semibold">
+                      Category Selection
+                    </p>
+                    {selectedQuiz?.selectedCategories.map(
+                      (category: string, catIndex: number) => (
+                        <div key={catIndex} className="flex items-center">
+                          <li className="text-neutral-800 font-semibold ml-4">
+                            {category}
+                          </li>
+                        </div>
+                      )
+                    )}
+                    <div className="flex items-center gap-2 mt-4">
+                      <p className="font-semibold text-lg text-neutral-800">
+                        Number of Questions:
+                      </p>
+                      <p className="text-neutral-600 font-semibold">
+                        {questions}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-lg text-neutral-800">
+                        Time per Question:
+                      </p>
+                      <p className="text-neutral-600 font-semibold">
+                        {selectedQuiz?.selectedTimeLimit}
+                      </p>
+                    </div>
                   </div>
-                )
+                </div>
               )}
-              <p className="text-neutral-600">{quiz.selectedNumOfQuestions}</p>
-              <p className="text-neutral-600">{quiz.selectedTimeLimit}</p>
             </div>
           ))}
         </div>
