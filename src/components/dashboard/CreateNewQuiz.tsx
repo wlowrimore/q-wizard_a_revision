@@ -25,6 +25,7 @@ const CreateNewQuiz: React.FC = (): React.ReactNode => {
     quizzes: [],
     userId: "",
     quizId: "",
+    id: Number(Date.now()),
   });
   const [successMsg, setSuccessMsg] = useState<string>("");
   const formRef = useRef<HTMLFormElement>(null);
@@ -121,7 +122,6 @@ const CreateNewQuiz: React.FC = (): React.ReactNode => {
             const objectStore = transaction.objectStore("quizzes");
 
             const addRequest = objectStore.add({
-              id: Date.now(),
               ...quizToSave,
             });
 

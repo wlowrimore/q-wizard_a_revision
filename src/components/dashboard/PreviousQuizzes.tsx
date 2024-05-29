@@ -8,10 +8,14 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { getFirstName } from "../../helpers";
 import { HiDotsVertical } from "react-icons/hi";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
 const PreviousQuizzes: React.FC = () => {
   const { data: session } = useSession();
   const [quizzes, setQuizzes] = useState<QuizData[]>([]);
   const [selectedQuiz, setSelectedQuiz] = useState<QuizData | null>(null);
+  const [userQuiz, setUserQuiz] = useState<QuizData | null>(null);
   const [currentTimeStars, setCurrentTimeStars] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const firstName = getFirstName();
@@ -55,11 +59,20 @@ const PreviousQuizzes: React.FC = () => {
     }
     setIsModalOpen(true);
   };
+
   const handleCloseModal = (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
     setSelectedQuiz(null);
     setIsModalOpen(false);
   };
+
+  console.log("Selected Quiz:", selectedQuiz);
+  const userQuizId = selectedQuiz
+    ? {
+        id: selectedQuiz.id,
+      }
+    : { id: "none" };
+  console.log("USER QUIZ ID:", userQuizId);
 
   const questions = selectedQuiz?.selectedNumOfQuestions.split(" ")[0];
 
@@ -186,7 +199,7 @@ const PreviousQuizzes: React.FC = () => {
                         </p>
                         <div className="flex items-center justify-center gap-8">
                           <button className="bg-emerald-300 text-neutral-950 font-semibold hover:bg-emerald-400/70 mx-auto py-1 px-3 rounded transition-all duration-200">
-                            <p>Start Quiz</p>
+                            <p>Launch</p>
                           </button>
                           <button className="bg-red-400/90 text-neutral-950 font-semibold hover:bg-red-500/70 mx-auto py-1 px-6 rounded transition-all duration-200">
                             <p>Delete</p>

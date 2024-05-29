@@ -6,6 +6,7 @@ import { UserData } from "../dataModels";
 import { UserContext } from "./UserContext";
 
 export interface QuizData {
+  id: number;
   quizId: string;
   quizTitle: string;
   selectedCategories: string[];
@@ -41,6 +42,7 @@ export const QuizContext = createContext<QuizContextValue>({
     createdBy: "",
     quizzes: [],
     userId: "",
+    id: 0,
   },
   dispatch: function (value: {
     type: string;
@@ -52,15 +54,6 @@ export const QuizContext = createContext<QuizContextValue>({
   userId: "",
   quizzes: [],
 });
-
-// const openIndexedDB = async () => {
-//   const db = await openDB("q-wizardDB", 1, {
-//     upgrade(db) {
-//       db.createObjectStore("quizzes", { keyPath: "id" });
-//     },
-//   });
-//   return db;
-// };
 
 const addQuizToIndexedDB = async (quizData: QuizData) => {
   const db = await openDB("q-wizardDB", 1);
@@ -88,6 +81,7 @@ export const QuizProvider: React.FC<QuizContextProps> = ({ children }) => {
     createdBy: "",
     quizzes: [],
     userId: "",
+    id: 0,
   });
 
   const dispatch = async (value: {
@@ -167,7 +161,6 @@ export const QuizProvider: React.FC<QuizContextProps> = ({ children }) => {
             break;
           }
 
-          console.log("Quizzes fetched from QuizContext:", quizzes);
           return quizzes;
         }
 
@@ -185,7 +178,6 @@ export const QuizProvider: React.FC<QuizContextProps> = ({ children }) => {
     <QuizContext.Provider
       value={{
         quizData,
-        // setQuizData,
         dispatch,
         userId: user?.id || "",
         quizzes: quizData.quizzes,
