@@ -37,6 +37,7 @@ const PreviousQuizzes: React.FC = () => {
 
   const handleOpenModal = (quiz: QuizData) => {
     setSelectedQuiz(quiz);
+
     switch (quiz.selectedTimeLimit) {
       case "10 seconds":
         setCurrentTimeStars("⭐⭐⭐⭐⭐");
@@ -59,6 +60,7 @@ const PreviousQuizzes: React.FC = () => {
     }
     setIsModalOpen(true);
   };
+  console.log("SELECTED QUIZ TO PASS:", selectedQuiz);
 
   const handleCloseModal = (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
@@ -66,13 +68,13 @@ const PreviousQuizzes: React.FC = () => {
     setIsModalOpen(false);
   };
 
-  console.log("Selected Quiz:", selectedQuiz);
-  const userQuizId = selectedQuiz
-    ? {
-        id: selectedQuiz.id,
-      }
-    : { id: "none" };
-  console.log("USER QUIZ ID:", userQuizId);
+  // console.log("Selected Quiz:", selectedQuiz);
+  // const userQuizId = selectedQuiz
+  //   ? {
+  //       id: selectedQuiz.id,
+  //     }
+  //   : { id: "none" };
+  // console.log("USER QUIZ ID:", userQuizId);
 
   const questions = selectedQuiz?.selectedNumOfQuestions.split(" ")[0];
 
@@ -198,9 +200,12 @@ const PreviousQuizzes: React.FC = () => {
                           <strong>NOT</strong> be able to change it.
                         </p>
                         <div className="flex items-center justify-center gap-8">
-                          <button className="bg-emerald-300 text-neutral-950 font-semibold hover:bg-emerald-400/70 mx-auto py-1 px-3 rounded transition-all duration-200">
+                          <Link
+                            href={`/quiz/${selectedQuiz?.id}`}
+                            className="bg-emerald-300 text-neutral-950 font-semibold hover:bg-emerald-400/70 mx-auto py-1 px-3 rounded transition-all duration-200"
+                          >
                             <p>Launch</p>
-                          </button>
+                          </Link>
                           <button className="bg-red-400/90 text-neutral-950 font-semibold hover:bg-red-500/70 mx-auto py-1 px-6 rounded transition-all duration-200">
                             <p>Delete</p>
                           </button>

@@ -6,6 +6,7 @@ import { UserData } from "../dataModels";
 import { UserContext } from "./UserContext";
 
 export interface QuizData {
+  stars: string | null;
   id: number;
   quizId: string;
   quizTitle: string;
@@ -15,6 +16,28 @@ export interface QuizData {
   createdBy: string;
   quizzes: QuizData[];
   userId: string;
+  dispatch: React.Dispatch<{
+    type: string;
+    quizData: QuizData;
+    userId: string; // Add the userId property here
+  }>;
+  user: {
+    id: string;
+    name?: string;
+    email?: string;
+    image?: string;
+  };
+  userQuiz: {
+    id: number;
+    quizId: string;
+    quizTitle: string;
+    selectedCategories: string[];
+    selectedTimeLimit: string;
+    selectedNumOfQuestions: string;
+    createdBy: string;
+    userId: string;
+    stars: string | null;
+  };
 }
 
 export interface QuizContextValue {
@@ -43,6 +66,31 @@ export const QuizContext = createContext<QuizContextValue>({
     quizzes: [],
     userId: "",
     id: 0,
+    userQuiz: {
+      id: 0,
+      quizId: "",
+      quizTitle: "",
+      selectedCategories: [],
+      selectedTimeLimit: "",
+      selectedNumOfQuestions: "",
+      createdBy: "",
+      userId: "",
+      stars: "",
+    },
+    dispatch: function (value: {
+      type: string;
+      quizData: QuizData;
+      userId: string;
+    }): void {
+      throw new Error("Function not implemented.");
+    },
+    user: {
+      id: "",
+      name: undefined,
+      email: undefined,
+      image: undefined,
+    },
+    stars: "",
   },
   dispatch: function (value: {
     type: string;
@@ -82,6 +130,27 @@ export const QuizProvider: React.FC<QuizContextProps> = ({ children }) => {
     quizzes: [],
     userId: "",
     id: 0,
+    userQuiz: {
+      id: 0,
+      quizId: "",
+      quizTitle: "",
+      selectedCategories: [],
+      selectedTimeLimit: "",
+      selectedNumOfQuestions: "",
+      createdBy: "",
+      userId: "",
+      stars: "",
+    },
+    stars: "",
+    dispatch: function (): void {
+      throw new Error("Function not implemented.");
+    },
+    user: {
+      id: "",
+      name: undefined,
+      email: undefined,
+      image: undefined,
+    },
   });
 
   const dispatch = async (value: {
