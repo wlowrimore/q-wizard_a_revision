@@ -16,6 +16,9 @@ export interface QuizData {
   createdBy: string;
   quizzes: QuizData[];
   userId: string;
+  category: string;
+  question: string[];
+  answer: string[];
   dispatch: React.Dispatch<{
     type: string;
     quizData: QuizData;
@@ -59,6 +62,9 @@ export const QuizContext = createContext<QuizContextValue>({
   quizData: {
     quizId: "",
     quizTitle: "",
+    question: [],
+    answer: [],
+    category: "",
     selectedCategories: [],
     selectedTimeLimit: "",
     selectedNumOfQuestions: "",
@@ -123,6 +129,9 @@ export const QuizProvider: React.FC<QuizContextProps> = ({ children }) => {
   const [quizData, setQuizData] = useState<QuizData>({
     quizId: "",
     quizTitle: "",
+    question: [],
+    answer: [],
+    category: "",
     selectedCategories: [],
     selectedTimeLimit: "",
     selectedNumOfQuestions: "",

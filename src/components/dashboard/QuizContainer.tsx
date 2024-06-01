@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { QuizData } from "../../contexts/QuizContext";
 import { QuizContext } from "../../contexts/QuizContext";
 import { HiOutlineLightBulb, HiOutlineCursorClick } from "react-icons/hi";
+import QuizWindow from "./QuizWindow";
 interface QuizContainerProps {
   quizId: string;
 }
@@ -13,6 +14,7 @@ interface QuizContainerProps {
 const QuizContainer: React.FC<QuizContainerProps> = ({ quizId }) => {
   const [quiz, setQuiz] = useState<QuizData | null>(null);
   const [stars, setStars] = useState<string>("");
+  const [openQuizWindow, setOpenQuizWindow] = useState<boolean>(false);
 
   useEffect(() => {
     if (quiz) {
@@ -64,13 +66,20 @@ const QuizContainer: React.FC<QuizContainerProps> = ({ quizId }) => {
     fetchUserQuiz();
   }, [quizId]);
 
+  const handleStartQuiz: React.MouseEventHandler<HTMLButtonElement> = (
+    event
+  ) => {
+    event.preventDefault();
+    setOpenQuizWindow(true);
+  };
+
   return (
     <div className="w-full h-full flex flex-col items-center justify-center">
       <div>
         {quiz ? (
           <>
             <div key={quiz.id} className="w-full h-auto grid grid-cols-2 mb-1">
-              <div className="flex flex-col border border-neutral-500 rounded-l-xl bg-slate-600 text-white w-full py-2 px-12">
+              <div className="flex flex-col border border-neutral-500 rounded-tl-xl bg-slate-600 text-white w-full py-2 px-12">
                 <p className="text-center text-2xl tracking-wide">
                   Time Limit / Question
                 </p>
@@ -78,14 +87,14 @@ const QuizContainer: React.FC<QuizContainerProps> = ({ quizId }) => {
                   {quiz?.selectedTimeLimit} / {quiz?.selectedNumOfQuestions}
                 </p>
               </div>
-              <div className="flex flex-col border border-neutral-500 rounded-r-xl bg-slate-600 text-white w-full py-2 px-12">
+              <div className="flex flex-col border border-neutral-500 rounded-tr-xl bg-slate-600 text-white w-full py-2 px-12">
                 <p className="text-center text-2xl tracking-wide">
                   Each Question Worth
                 </p>
                 <p className="text-xl text-center tracking-wider">{stars}</p>
               </div>
             </div>
-            <div className="flex text-lg tracking-wide w-full mx-auto gap-2 items-center justify-center py-1 px-4 bg-yellow-400/60 rounded-xl">
+            <div className="flex text-lg tracking-wide w-full mx-auto gap-2 items-center justify-center py-1 px-4 bg-yellow-400/60 rounded-b-xl border-t border-slate-400">
               <div className="flex items-center font-bold gap-2">
                 <p>Your Category Selection:</p>
                 <span>
@@ -111,10 +120,14 @@ const QuizContainer: React.FC<QuizContainerProps> = ({ quizId }) => {
           <span className="text-cyan-700 font-bold">{quiz?.quizTitle}</span>
           &nbsp;Is Ready
         </h1>
-        <button className="bg-emerald-400 text-slate-800 border border-emerald-500 hover:bg-slate-600/90 hover:text-yellow-400 text-2xl p-2 rounded-full flex items-center transition duration-200">
+        <button
+          onClick={handleStartQuiz}
+          className="bg-emerald-400 text-slate-800 border border-emerald-500 hover:bg-slate-600/90 hover:text-yellow-400 text-2xl p-2 rounded-full flex items-center transition duration-200"
+        >
           <HiOutlineCursorClick />
         </button>
       </div>
+      <div>{openQuizWindow && <QuizWindow quiz={quiz} />}</div>
     </div>
   );
 };

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { SlideInMenuProps } from "./Header";
 import { signOut } from "next-auth/react";
+import Link from "next/link";
 
 const SlideInMenu: React.FC<SlideInMenuProps> = ({ session, isMenuOpen }) => {
   return (
@@ -24,9 +25,12 @@ const SlideInMenu: React.FC<SlideInMenuProps> = ({ session, isMenuOpen }) => {
           <p className="w-full text-white text-xl hover:bg-neutral-900/20 py-2 pl-6 pr-[8rem] transition duration-300 rounded-2xl">
             View Quizzes
           </p>
-          <p className="w-full text-white text-xl hover:bg-neutral-900/20 py-2 pl-6 pr-[8rem] transition duration-300 rounded-2xl">
-            View Notes
-          </p>
+          <Link
+            href="/dashboard"
+            className="w-full text-white text-xl hover:bg-neutral-900/20 py-2 pl-6 pr-[8rem] transition duration-300 rounded-2xl"
+          >
+            Dashboard
+          </Link>
           <p
             onClick={() => signOut({ callbackUrl: "/", redirect: true })}
             className="w-full text-white text-sm hover:bg-neutral-900/20 py-2 pl-6 pr-[8rem] transition duration-300 rounded-2xl"
