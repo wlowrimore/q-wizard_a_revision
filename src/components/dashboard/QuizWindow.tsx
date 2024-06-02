@@ -9,6 +9,8 @@ interface QuizWindowProps {
 }
 const QuizWindow: React.FC<QuizWindowProps> = ({ quiz }) => {
   const [quizQuestions, setQuizQuestions] = useState<QuizData[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+  const [timeRemaining, setTimeRemaining] = useState<number>(0);
   const [cat1FetchResults, setCat1FetchResults] = useState<QuizData[]>([]);
   const [cat2FetchResults, setCat2FetchResults] = useState<QuizData[]>([]);
   const [cat3FetchResults, setCat3FetchResults] = useState<QuizData[]>([]);
@@ -20,6 +22,8 @@ const QuizWindow: React.FC<QuizWindowProps> = ({ quiz }) => {
 
   const [numOfQuestions, setNumOfQuestions] = useState<any>(null);
   const [timeLimit, setTimeLimit] = useState<string | null>(null);
+
+  const [timeExpire, setTimeExpire] = useState<boolean>(false);
 
   const {
     selectedCategories = [],
@@ -62,9 +66,6 @@ const QuizWindow: React.FC<QuizWindowProps> = ({ quiz }) => {
     };
     fetchUserSelectedCategoriesandNoq();
   }, [quiz]);
-
-  console.log("Category1:", category1);
-  console.log("Category2:", category2);
   console.log("Category3:", category3);
   console.log("Num of Questions:", numOfQuestions);
   console.log("Time Limit:", timeLimit);
@@ -177,25 +178,74 @@ const QuizWindow: React.FC<QuizWindowProps> = ({ quiz }) => {
     combineAndRandomizeQuestions();
   }, [cat1FetchResults, cat2FetchResults, cat3FetchResults, numOfQuestions]);
 
+  // Cycle through quiz questions
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < quizQuestions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setTimeRemaining(Number(timeLimit));
+    } else {
+      console.log("Quiz Completed!");
+    }
+  };
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout | number;
+
+    const startTimer = () => {
+      if (timeLimit) {
+        setTimeRemaining(parseInt(timeLimit));
+        console.log("Time Limit:", timeLimit);
+        timer = setInterval(() => {
+          setTimeRemaining((prevTime) => {
+            if (prevTime && prevTime > 0) {
+              return prevTime - 1;
+            } else {
+              clearInterval(timer);
+              return prevTime;
+            }
+          });
+        }, 1000);
+      }
+    };
+
+    startTimer();
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [timeLimit]);
+
   return (
-    <div className="w-2/3 mx-auto h-full flex flex-col justify-center items-center">
-      {quizQuestions &&
-        quizQuestions.length > 0 &&
-        quizQuestions.map((result, apiIndex) => (
+    <>
+      <div className="w-full flex justify-between mt-6 mb-2 text-lg text-neutral-950 font-semibold">
+        <p className="">Question: {currentQuestionIndex + 1}</p>
+        <p
+          className={`text-${
+            timeRemaining <= 10 ? "red-500 animate-pulse" : "black"
+          }`}
+        >
+          Time Remaining: {timeRemaining}
+        </p>
+      </div>
+      {console.log("Time Remaining:", timeRemaining)}
+      <div className="w-full mx-auto h-full flex flex-col justify-center items-center">
+        {quizQuestions && quizQuestions.length > 0 && (
           <div
-            key={apiIndex}
+            key={currentQuestionIndex}
             className="flex flex-col items-center p-6 border-2 border-neutral-950 rounded-lg"
           >
-            {formatCategoryNames([result.category]).map((category) => (
+            {formatCategoryNames([
+              quizQuestions[currentQuestionIndex].category,
+            ]).map((category) => (
               <h3
-                key={apiIndex}
+                key={category}
                 className="bg-slate-600 rounded-t-lg p-2 text-white w-full text-start italic text-sm tracking-wide"
               >
                 {category}
               </h3>
             ))}
             <p className="text-lg font-bold mb-3 w-full text-start">
-              {result.question}
+              {quizQuestions[currentQuestionIndex].question}
             </p>
             <form className="w-full flex items-center mb-6">
               <input
@@ -212,11 +262,14 @@ const QuizWindow: React.FC<QuizWindowProps> = ({ quiz }) => {
             </form>
             <p className="text-lg">
               The correct answer is&nbsp;
-              <span className="font-bold">{result.answer}</span>
+              <span className="font-bold">
+                {quizQuestions[currentQuestionIndex].answer}
+              </span>
             </p>
           </div>
-        ))}
-    </div>
+        )}
+      </div>
+    </>
   );
 };
 
