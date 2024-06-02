@@ -74,7 +74,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({ quizId }) => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center">
+    <div className="w-full h-full my-24 flex flex-col items-center justify-center">
       <div>
         {quiz ? (
           <>
@@ -115,7 +115,7 @@ const QuizContainer: React.FC<QuizContainerProps> = ({ quizId }) => {
           <p>Loading Quiz...</p>
         )}
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 my-6 px-12 border-b border-neutral-300">
         <h1 className="text-neutral-950 font-semibold text-3xl my-6">
           <span className="text-cyan-700 font-bold">
             &quot;{quiz?.quizTitle}&quot;

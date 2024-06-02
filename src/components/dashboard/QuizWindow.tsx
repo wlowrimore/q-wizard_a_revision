@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useContext } from "react";
-import { useParams } from "next/navigation";
+import { formatCategoryNames } from "@/helpers";
 import { openDB } from "idb";
 import { QuizData } from "../../contexts/QuizContext";
-import Quiz from "@/app/quiz/[quizId]/page";
+import { GiCheckMark } from "react-icons/gi";
 
 interface QuizWindowProps {
   quiz: QuizData | null;
@@ -178,13 +178,42 @@ const QuizWindow: React.FC<QuizWindowProps> = ({ quiz }) => {
   }, [cat1FetchResults, cat2FetchResults, cat3FetchResults, numOfQuestions]);
 
   return (
-    <div className="w-full h-full flex flex-col justify-center items-center">
+    <div className="w-2/3 mx-auto h-full flex flex-col justify-center items-center">
       {quizQuestions &&
         quizQuestions.length > 0 &&
         quizQuestions.map((result, apiIndex) => (
-          <div key={apiIndex} className="flex items-center gap-2">
-            <p key={apiIndex}>{result.question}</p>
-            <p className="font-bold">{result.category}</p>
+          <div
+            key={apiIndex}
+            className="flex flex-col items-center p-6 border-2 border-neutral-950 rounded-lg"
+          >
+            {formatCategoryNames([result.category]).map((category) => (
+              <h3
+                key={apiIndex}
+                className="bg-slate-600 rounded-t-lg p-2 text-white w-full text-start italic text-sm tracking-wide"
+              >
+                {category}
+              </h3>
+            ))}
+            <p className="text-lg font-bold mb-3 w-full text-start">
+              {result.question}
+            </p>
+            <form className="w-full flex items-center mb-6">
+              <input
+                type="text"
+                name="user-answer"
+                id="user-answer"
+                placeholder="Enter your answer"
+                className="w-full outline-none p-2 bg-gradient-to-tr from-slate-100"
+              />
+              <button className="text-slate-800 p-2.5 rounded-full flex items-center hover:text-emerald-700 transition duration-200">
+                <GiCheckMark className="w-5 h-5" />
+                submit
+              </button>
+            </form>
+            <p className="text-lg">
+              The correct answer is&nbsp;
+              <span className="font-bold">{result.answer}</span>
+            </p>
           </div>
         ))}
     </div>
