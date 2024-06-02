@@ -115,14 +115,16 @@ const QuizContainer: React.FC<QuizContainerProps> = ({ quizId }) => {
           <p>Loading Quiz...</p>
         )}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         <h1 className="text-neutral-950 font-semibold text-3xl my-6">
-          <span className="text-cyan-700 font-bold">{quiz?.quizTitle}</span>
+          <span className="text-cyan-700 font-bold">
+            &quot;{quiz?.quizTitle}&quot;
+          </span>
           &nbsp;Is Ready
         </h1>
         <button
           onClick={handleStartQuiz}
-          className="bg-emerald-400 text-slate-800 border border-emerald-500 hover:bg-slate-600/90 hover:text-yellow-400 text-2xl p-2 rounded-full flex items-center transition duration-200"
+          className="bg-emerald-400 text-slate-800 border border-emerald-500 hover:bg-slate-600/90 hover:text-yellow-400 text-3xl p-1 rounded-full flex items-center transition duration-200"
         >
           <HiOutlineCursorClick />
         </button>
